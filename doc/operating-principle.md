@@ -9,8 +9,7 @@ Upon encountering an instruction in the instruction decoder which it is not able
 ### Core-Adapter Offloading Handshake
 Offloaded instructions can not be retracted by the offloading core once they have been accepted by the accelerator adapter.
 It is therefore essential, that any instructions present in the offloading core's pipeline are guaranteed to not raise any exceptions that might require invalidation of the results produced by the offloaded instruction.
-In particular, an instrucion may not be offloaded if there is a memory operation pending in either the core's pipeline or any of the connected accelerator units.
-The memory operation status of connected accelerators is tracked by the accelerator adapter and provided to the core via the asynchronous status signal `adapter_mem_pending`.
+If the core can throw memory exceptions, an instrucion may not be offloaded if there is a memory operation pending in either the core's pipeline or any of the connected accelerator units.
 
 Once there are no such conflicts possible, the offloading core initiates the offload request transaction by asserting it's `x.q_valid` line on the [X instruction offloading interface](x-interface.md).
 
@@ -62,7 +61,7 @@ The REI defines two distinct modes of memory access for external accelerator uni
 Furthermore, offloaded memory operations are classified with the following attributes.
 - *Synchronous* memory operations are performed in lockstep with the rest of the instruction stream.
   Access faults resulting from synchronous memory operations are trapped precisely by the offloading core.
-  Neither the offloading core nor any of the connected accelerators may commit any new instruction results while synchronous memory operations are being served.
+  If the offloading core can throw memory exceptions, neither it nor any of the connected accelerators may commit any new instruction results while synchronous memory operations are being served. An offloading core that cannot throw memory exception only has to stall when it encounters a core-internal memory operation while an offloaded memory instruction is still pending. This is done to prevent write-after-write hazards.
 - *Speculative* memory operations do not automatically trigger exceptions in the offloading core upon encountering access faults.
   The success or failure of a speculative memory operation is reported by the accelerator upon completion of the instruciton.
 - *Asynchronous* memory operations execute in parallel to the main instruction stream.
@@ -115,10 +114,15 @@ This brings several advantages as compared to accelerator-private memory interfa
 An internal-mode memory transaction is triggered by an offload request implying a load or store memory access being accepted by the accelerator adapter.
 The memory operation is identified by the accelerator predecoders, the offloading core is informed of the pending memory request through the X-interface signal `x.k_is_mem_op`.
 
+> If a core can throw memory exception it must adhere the following rules:
 > At this point and until the status signal is reset, the core is not allowed to commit any subsequent instructions.
 > Speculative execution may continue internally, if the core implements roll-back in case of an access fault occuring.
 > Further instruction offload requests may not be issued to the accelerator adapter while there is an offloaded memory operation pendin, since there is no means to retract any offloaded instructions in case the result must be invalidated.
 > The offloaded instruction's program counter must be stored by the offloading core for possible exception handling upon access faults.
+
+> If a core cannot throw memory exception it must adhere the following rules:
+> Core has to stall if it encounters a core-internal memory instruction. This is done to prevent write-after-write hazards.
+> For all other instructions the core can keep running.
 
 The offload request is forwarded to the accelerator subsystem via the C-interface.
 The accelerator subsystem decodes the instructions and determines memory address and nature of the operation (read/write).
@@ -144,12 +148,12 @@ The accelerator unit set the appropriate signals on the C-Mem request channel an
 - `cmem.q_hart_id` the processor core's hart ID is used for routing the C-Mem request accross the accelerator interconnect.
   This signal is *not* forwarded to the offloading core accross the X-Mem interface.
 
+An accelerator subsystem can send only one memory instruction back to a core at any  time.
 The accelerator adapter forwards the C-Mem request to the offloading core via the X-Mem interface.
-The offloading core is aware of an outstanding memory request by the accelerator adapter due to the `adapter_mem_pending` status signal and provides control over the the internal load/store unit to the adapter.
 The X-Mem request channel payload signals comprise the signals `q_laddr`, `q_wdata`, `q_width`, `q_req_type`, `q_mode` and `q_spec`.
 
 The X-Mem request payload data is transfered to the offloading core's LSU and acknowleged by the core via the `xmem.q_ready` signal in the same cycle as the memory response transaction is initiated:
-- The offloading core asserts `xmem.q_ready` to complete the memory request transaction and simultaneously initiates a memory response transaction by asserting `xmem.p_valid`.
+- The offloading core asserts `xmem.q_ready` to complete the memory request transaction and simultaneously initiates a memory response transaction by asserting `xmem.p_valid` (a core that cannot throw memory exceptions may assert 'xmem.q_ready' as soon as it has received the memory instruction).
 - `xmem.p_rdata` carries the loaded memory contents if the access was a load operation.
   For store operations the signal is assigned `'0`.
 - `xmem.p_range` is unused for standard mode memory operations. it is assigned `'0`.
