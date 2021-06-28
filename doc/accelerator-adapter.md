@@ -42,7 +42,7 @@ The `acc_adapter` module variation additionally requires the accordingly generat
 
   The typedefs are automatically declared using the typedef macros defined [here](../include/acc_interface/typedef.svh) as demonstrated in the following snippet.
 
-```
+```sv
   typedef logic [AddrWidth-1:0] addr_t; // AddrWidth parameter as defined in doc/c-interface.md.
   typedef logic [DataWidth-1:0] data_t;
 
@@ -54,7 +54,7 @@ The `acc_adapter` module variation additionally requires the accordingly generat
 The accelerator adapter module featuresthe following ports:
 | Interface Name (`acc_adapter_intf`) | Port Name (`acc_adapter`) | Type (`acc_adapter`)     | Description                                                        |
 | ---------                           | ---------                 | ----                     | -----------                                                        |
-| `hart_id_i`                         | `hart_id_i`               | `logic [DataWdth-1:0]`   | RISC-V hardware threat ID (hart id)                                |
+| `hart_id_i`                         | `hart_id_i`               | `logic [DataWdth-1:0]`   | RISC-V hardware thread ID (hart id)                                |
 | `acc_x_slv`                         | `acc_x_slv_req_i`         | `acc_x_req_t`            | X-interface request channel input from offloading CPU              |
 |                                     | `acc_x_slv_rsp_o`         | `acc_x_rsp_t`            | X-interface response channel output to offloading CPU              |
 | `acc_xmem_mst`                      | `acc_xmem_mst_req_o`      | `acc_xmem_req_t`         | XMem-interface request channel output to offloading CPU            |

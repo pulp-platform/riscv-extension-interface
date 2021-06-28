@@ -58,8 +58,8 @@ The core-v-xif enables decoupled development of accelerators and CPU cores throu
 
 ### Dual-Writeback Instructions
 The core-v-xif optionally supports implementation of custom ISA extensions mandating dual register writebacks.
-In order to accomodate that need we provision the possibility to reserve multiple destination registers for a single offloaded instruction.
-For even destination registers other than `X0`,  `Xn` and `Xn+1` are reserved for writeback upon offloading a dual-writeback instruction, where `Xn` denotes the destination register addresss extracted from `instr_data[11:7]`.
+In order to accommodate that need we provision the possibility to reserve multiple destination registers for a single offloaded instruction.
+For even destination registers other than `X0`,  `Xn` and `Xn+1` are reserved for writeback upon offloading a dual-writeback instruction, where `Xn` denotes the destination register address extracted from `instr_data[11:7]`.
 
 ### Ternary Operations
 The core-v-xif optionally supports ISA extensions implementing instructions which use three source operands.
@@ -74,7 +74,7 @@ Any number of cores in a cluster can be connected to share a selection of accele
 
 ### Transaction Ordering
 The accelerator interconnect itself does not guarantee any response transaction ordering.
-The order in which offload requests are issued is determined by validity of source- and destination registers of the instruction to be offloaded.
+The order in which offload requests are issued is determined by validity of source and destination registers of the instruction to be offloaded.
 The offloading core may provide internal structures to facilitate multiple instructions to be issued independently, resulting in a pseudo multi-issue pipeline.
 
 ### Memory Operations
@@ -86,16 +86,16 @@ The core-v-xif defines two distinct modes of memory access for external accelera
   For this purpose, external mode memory operations are defined.
 
 ## Interface Subset Naming Convention
-The naming scheme to describe the subset of optional features included in a hardware implementation of the core-v-xif implementation comprises the following components.
+The naming scheme to describe the subset of optional features included in a hardware implementation of the core-v-xif implementation comprises the following components:
 
-| Component | Description                                   |
-| --------- | -----------                                   |
-| core-v-xifv[X]   | core-v-xif Version [X] of the specification draft    |
-| XLEN      | Base ISA bit width                            |
-| T         | Support for ternary operations                |
-| D         | Support for dual-writeback instructions       |
-| M         | Support for 'internal mode' memory operations |
-| E         | Support for 'external mode' memory operations |
+| Component      | Description                                       |
+| -------------- | ------------------------------------------------- |
+| core-v-xifv[X] | core-v-xif Version [X] of the specification draft |
+| XLEN           | Base ISA bit width                                |
+| T              | Support for ternary operations                    |
+| D              | Support for dual-writeback instructions           |
+| M              | Support for 'internal mode' memory operations     |
+| E              | Support for 'external mode' memory operations     |
 
 The specification version indicator is separated from the rest of the description string by an underscore (`_`).
 For example, a hardware implementation of the spec version 0.1 (this version) based on a 32 bit core supporting ternary operations and internal mode memory operations would be described with `core-v-xifv0.1_32TM`.

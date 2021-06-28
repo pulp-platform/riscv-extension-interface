@@ -4,7 +4,7 @@ The X-Interface implements accelerator-agnostic instruction offloading and trans
 ## Interface Definition
 The X-Interface defines in total four independent decoupled channels communication between the accelerator adapter and the offloading processor core.
 The X-Request and X-Response channels route instruction offloading requests and accelerator writeback responses.
-The XMem-Request and XMem-Reponse channels route memory transaction requests and responses.
+The XMem-Request and XMem-Response channels route memory transaction requests and responses.
 
 The X and XMem SystemVerilog interfaces are separately defined as independent entities.
 Request channel signals are prefixed with the letter `q`.
@@ -27,7 +27,7 @@ The interface is parameterized using the following set of parameters.
 
 #### Derived Parameters
 | Name    | Value                   | Description                                 |
-| ----    | -----                   | -----------                                 |
+| ------- | ----------------------- | ------------------------------------------- |
 | `NumRs` | `TernaryOps ? 3 : 2`    | Supported number of source registers        |
 | `NumWb` | `DualWriteback ? 2 : 1` | Supported number of simultaneous writebacks |
 
@@ -35,7 +35,7 @@ The interface is parameterized using the following set of parameters.
 #### X-Request Channel
 The request channel signals are:
 | Signal Name       | Type                    | Direction      | Description                                                |
-| -----------       | -----                   | ---------      | -----------                                                |
+| ----------------- | ----------------------- | -------------- | ---------------------------------------------------------- |
 | `q_instr_data`    | `logic [31:0]`          | Core > Adapter | Instruction data (ID stage)                                |
 | `q_rs[NumRs-1:0]` | `logic [DataWidth-1:0]` | Core > Adapter | Source register contents                                   |
 | `q_rs_valid`      | `logic [NumRs-1:0]`     | Core > Adapter | Source register valid indicator                            |
@@ -71,11 +71,11 @@ The instruction offloading process takes place according to the following scheme
 The response channel signals are:
 
 | Signal Name       | Type                    | Direction      | Description                                                                   |
-| -----------       | -----                   | ---------      | -----------                                                                   |
+| ----------------- | ----------------------- | -------------- | ----------------------------------------------------------------------------- |
 | `p_rd`            | `logic [4:0]`           | Adapter > Core | Destination register address                                                  |
 | `p_data[NumWb:0]` | `logic [DataWidth-1:0]` | Adapter > Core | Instruction response data                                                     |
 | `p_dualwb`        | `logic`                 | Adapter > Core | Dual-Writeback response (constant `1'b0`, if dual-writeback is not supported) |
-| `p_type`          | `logic`                 | Adapter > Core | Response type
+| `p_type`          | `logic`                 | Adapter > Core | Response type                                                                 |
 | `p_error`         | `logic`                 | Adapter > Core | Error flag                                                                    |
 
 Notes:
@@ -99,7 +99,7 @@ Notes:
 The request channel signals from the adapter to the offloading core are:
 
 | Signal Name          | Type                    | Direction      | Description                                               |
-| -----------          | ----                    | ---------      | -----------                                               |
+| -------------------- | ----------------------- | -------------- | --------------------------------------------------------- |
 | `q_laddr`            | `logic [DataWidth-1:0]` | Adapter > Core | Target logical memory address                             |
 | `q_wdata`            | `logic [DataWidth-1:0]` | Adapter > Core | Memory write data                                         |
 | `q_width`            | `logic [1:0]`           | Adapter > Core | Memory access width (byte, half-word, word, [...])        |
@@ -113,7 +113,7 @@ The request channel signals from the adapter to the offloading core are:
 The response channel signals from the offloading core to the adapter are:
 
 | Signal Name | Type                           | Direction             | Description                           |
-| ----------- | ----                           | ---------             | -----------                           |
+| ----------- | ------------------------------ | --------------------- | ------------------------------------- |
 | `p_rdata`   | `logic [DataWidth-1:0]`        | Core > Adapter        | Memory response data.                 |
 | `p_range`   | `logic [clog2(DataWidth)-1:0]` | Core > Adapter        | Validity LSB range of memory metadata |
 | `p_status`  | `logic`                        | Core > Adapter        | Transaction status (success / fail)   |
@@ -122,7 +122,7 @@ Notes:
   - The response transaction status `p_status` field indicates the success (`p_status = 1'b1`) or failure (`p_status = 1'b0`) of the memory operation.
       - For standard requests, the status field indicates if the operation raised an access fault exception.
       - For probing memory requests, the status field indicates if the requested access has been granted.
-  - The `p_range` field carries information on the memory region querried with a probing memory request.
+  - The `p_range` field carries information on the memory region queried with a probing memory request.
     If the `p_status` field signals access has been granted, this field specifies the number of bits that can be changed in the logical address without changing the metadata
 
 ## Master/Slave Interface Ports

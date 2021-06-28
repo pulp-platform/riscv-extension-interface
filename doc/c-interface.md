@@ -6,7 +6,7 @@ The C-Interface implements signal routing from and to the accelerator units.
 The C-Interface features two independent decoupled channels for offloading requests and accelerator writeback.
 The C-Interface defines in total four independent decoupled channels communication between the accelerator adapter and the accelerator units.
 The C-Request and C-Response channels route instruction offloading requests and accelerator writeback responses.
-The CMem-Request and CMem-Reponse channels route memory transaction requests and responses.
+The CMem-Request and CMem-Response channels route memory transaction requests and responses.
 
 The C and CMem SystemVerilog interfaces are separately defined as independent entities.
 Request channel signals are prefixed with the letter `q`.
@@ -22,7 +22,7 @@ All transactions are handshaked according to the following scheme:
 The interface is parameterized using the following set of parameters.
 
 | Name              | Type / Range        | Description                                       |
-| ----              | ------------        | -----------                                       |
+| ----------------- | ------------------- | ------------------------------------------------- |
 | `DataWidth`       | `int` (32, 64, 128) | ISA Bit-width                                     |
 | `NumReq`          | `int` (>=1)         | Number of requesting entities                     |
 | `NumHier`         | `int` (>=1)         | Number of hierarchical interconnect levels        |
@@ -32,7 +32,7 @@ The interface is parameterized using the following set of parameters.
 
 #### Derived Parameters
 | Name            | Value                          | Description                                               |
-| ----            | -----                          | -----------                                               |
+| --------------- | ------------------------------ | --------------------------------------------------------- |
 | `MaxNumRsp`     | `max(NumRsp)`                  | Maximum number of responding entities per hierarchy level |
 | `HierAddrWidth` | `clog2(NumHier)`               | Hierarchy level address width                             |
 | `AccAddrWidth`  | `clog2(MaxNumRsp)`             | Accelerator address width                                 |
@@ -46,7 +46,7 @@ The interface is parameterized using the following set of parameters.
 The request channel interface signals are:
 
 | Signal Name       | Type                               | Direction             | Description                 |
-| -----------       | ----                               | ---------             | -----------                 |
+| ----------------- | ---------------------------------- | --------------------- | --------------------------- |
 | `q_addr`          | `logic [AddrWidth-1:AccAddrWidth]` | Adapter > Accelerator | Accelerator hierarchy level |
 |                   | `logic [AccAddrWidth-1:0]`         | Adapter > Accelerator | Accelerator address         |
 | `q_hart_id`       | `logic [DataWidth-1:0]`            | Adapter > Accelerator | Hart ID                     |
@@ -63,12 +63,12 @@ Notes:
 If a response is returned, the response channel carries the following signals:
 
 | Signal Name       | Range                   | Direction             | Description                                                                   |
-| -----------       | -----                   | ---------             | -----------                                                                   |
+| ----------------- | ----------------------- | --------------------- | ----------------------------------------------------------------------------- |
 | `p_hart_id`       | `logic [DataWidth-1:0]` | Accelerator > Adapter | Hart ID                                                                       |
 | `p_rd`            | `logic [4:0]`           | Accelerator > Adapter | Destination register address                                                  |
 | `p_data[NumWb:0]` | `logic [DataWidth-1:0]` | Accelerator > Adapter | Instruction response data                                                     |
 | `p_dualwb`        | `logic`                 | Accelerator > Adapter | Dual-Writeback Response (constant `1'b0`, if dual-writeback is not supported) |
-| `p_type`          | `logic`                 | Accelerator > Adapter | Response type
+| `p_type`          | `logic`                 | Accelerator > Adapter | Response type                                                                 |
 | `p_error`         | `logic`                 | Accelerator > Adapter | Error Flag                                                                    |
 
 Notes:
@@ -92,7 +92,7 @@ Notes:
 The request channel signals from the accelerator units to the accelerator adapter are:
 
 | Signal Name          | Type                               | Direction             | Description                                               |
-| -----------          | ----                               | ---------             | -----------                                               |
+| -------------------- | ---------------------------------- | --------------------- | --------------------------------------------------------- |
 | `q_hart_id`          | `logic [DataWidth-1:0]`            | Accelerator > Adapter | Hart ID                                                   |
 | `q_addr`             | `logic [AddrWidth-1:AccAddrWidth]` | Accelerator > Adapter | Accelerator hierarchy level                               |
 |                      | `logic [AccAddrWidth-1:0]`         | Accelerator > Adapter | Accelerator address                                       |
@@ -108,8 +108,8 @@ The request channel signals from the accelerator units to the accelerator adapte
 The response channel signals from the accelerator adapter to the accelerator unit are:
 
 | Signal Name  | Type                           | Direction             | Description                           |
-| -----------  | ----                           | ---------             | -----------                           |
-| `p_addr` | `logic [AddrWidth-1:0]`        | Adapter > Accelerator | Accelerator address                   |
+| ------------ | ------------------------------ | --------------------- | ------------------------------------- |
+| `p_addr`     | `logic [AddrWidth-1:0]`        | Adapter > Accelerator | Accelerator address                   |
 | `p_hart_id`  | `logic [DataWidth-1:0]`        | Adapter > Accelerator | Hart ID                               |
 | `p_rdata`    | `logic [DataWidth-1:0]`        | Adapter > Accelerator | Memory response data.                 |
 | `p_range`    | `logic [clog2(DataWidth)-1:0]` | Adapter > Accelerator | Validity LSB range of memory metadata |
@@ -119,7 +119,7 @@ Notes:
   - The response transaction status `p_status` field indicates the success (`p_status = 1'b1`) or failure (`p_status = 1'b0`) of the memory operation.
       - For standard requests, the status field indicates if the operation raised an access fault exception.
       - For probing memory requests, the status field indicates if the requested access has been granted.
-  - The `p_range` field carries information on the memory region querried with a probing memory request.
+  - The `p_range` field carries information on the memory region queried with a probing memory request.
     If the `p_status` field signals access has been granted, this field specifies the number of bits that can be changed in the logical address without changing the metadata
 
 ## Master/Slave Interface Ports

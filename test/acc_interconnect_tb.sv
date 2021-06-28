@@ -496,7 +496,7 @@ module acc_interconnect_tb  #(
 
   // C Response Path
   // ---------------
-  // Map each C reponse observed at the core response output to a response generated at the
+  // Map each C response observed at the core response output to a response generated at the
   // accelerator response input port.
   initial begin
     scoreboard_tracker::nr_c_responses = 0;
@@ -623,7 +623,7 @@ module acc_interconnect_tb  #(
       join_none
     end
 
-    // Check fowarded responses
+    // Check forwarded responses
     for (int jj=0; jj<NumReq; jj++) begin
       automatic int j = jj; // forwarding port ID
       fork
